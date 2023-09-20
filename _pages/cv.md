@@ -11,7 +11,7 @@ redirect_from:
 
 Education
 ======
-* Undergraduate in Aritificial Intelligence, Sun Yat-sen University, 2020 ~ present
+* Undergraduate in the School of Aritificial Intelligence, Sun Yat-sen University, 2020 ~ present
 
 <!-- Work experience
 ======
