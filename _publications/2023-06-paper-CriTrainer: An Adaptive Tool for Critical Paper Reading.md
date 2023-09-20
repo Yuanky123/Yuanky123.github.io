@@ -5,8 +5,8 @@ permalink: /publication/2023-06-paper-CriTrainer:An Adaptive Tool for Critical P
 excerpt: 'This paper is about the number 1. The number 2 is left for future work.'
 date: 2023-06
 venue: 'User Interface Software and Technology (UIST) (CCF-A)'
-paperurl: 'http://academicpages.github.io/files/paper1.pdf'
-citation: 'Your Name, You. (2009). &quot;Paper Title Number 1.&quot; <i>Journal 1</i>. 1(1).'
+paperurl: 'http://Yuanky123.github.io/files/An_Adaptive_Training_Tool_for_Critical_Paper_Reading.pdf'
+# citation: 'Your Name, You. (2009). &quot;Paper Title Number 1.&quot; <i>Journal 1</i>. 1(1).'
 ---
 # Abstract
 Learning to read scientific papers critically, which requires first
