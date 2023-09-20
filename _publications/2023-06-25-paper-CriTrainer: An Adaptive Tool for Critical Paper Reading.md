@@ -2,7 +2,7 @@
 title: "CriTrainer: An Adaptive Training Tool for Critical Paper Reading"
 collection: Accecpted (To be published)
 permalink: /publication/2023-06-25-paper-CriTrainer:An Adaptive Training Tool for Critical Paper Reading
-excerpt: 'This paper is about the number 1. The number 2 is left for future work.'
+# excerpt: 'This paper is about the number 1. The number 2 is left for future work.'
 date: 2023-06-25
 venue: 'User Interface Software and Technology (UIST) (CCF-A)'
 paperurl: 'http://Yuanky123.github.io/files/An_Adaptive_Training_Tool_for_Critical_Paper_Reading.pdf'
