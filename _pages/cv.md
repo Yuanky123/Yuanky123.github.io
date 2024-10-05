@@ -11,7 +11,8 @@ redirect_from:
 
 Education
 ======
-* Undergraduate in the School of Aritificial Intelligence, Sun Yat-sen University, 2020 ~ present
+* Undergraduate in the School of Aritificial Intelligence, Sun Yat-sen University, 2020 ~ 2024
+* Phd student in the Department of Computer Science and Engineering, Hong Kong University of Science and Technology, 2024 ~ present
 
 <!-- Work experience
 ======
