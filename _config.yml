@@ -10,7 +10,7 @@ locale                   : "zh-CN"
 title                    : "Kangyu Yuan's Pages"
 title_separator          : "-"
 name                     : &name "Kangyu Yuan"
-description              : &description "Undergraduate student in Sun Yat-sen University, China."
+description              : &description "Phd student in Hong Kong University of Science and Technology, SAR, China."
 url                      : https://Yuanky123.github.io # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
 repository               : "Yuanky123/Yuanky123.github.io"
@@ -82,12 +82,12 @@ analytics:
 author:
   name             : "Kangyu Yuan"
   avatar           : "profile.png"
-  bio              : "Undergraduate student in Sun Yat-sen University, China."
+  bio              : "Phd student in Hong Kong University of Science and Technology, SAR, China."
   location         : "China"
   employer         :
   pubmed           : 
   googlescholar    : 
-  email            :  "yuanky5@mail2.sysu.edu.cn"
+  email            :  "kyuanaf@connect.ust.hk"
   researchgate     :  # example: "https://www.researchgate.net/profile/yourprofile"
   uri              :
   bitbucket        :
