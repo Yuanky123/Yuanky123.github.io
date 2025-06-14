@@ -11,7 +11,29 @@ import {
   writeBatch,
   doc
 } from 'firebase/firestore';
-import { db } from '../firebase';
+
+// 安全导入Firebase
+let db = null;
+let firebaseInitialized = false;
+
+const initializeFirebase = async () => {
+  if (firebaseInitialized) return db;
+  
+  try {
+    const firebaseModule = await import('../firebase');
+    db = firebaseModule.db;
+    if (!db) {
+      console.warn('Firebase db is not available, running in offline mode');
+    } else {
+      console.log('Firebase initialized successfully');
+    }
+  } catch (error) {
+    console.warn('Firebase import failed, running in offline mode:', error.message);
+  }
+  
+  firebaseInitialized = true;
+  return db;
+};
 
 // 消息集合名称
 const MESSAGES_COLLECTION = 'chat_messages';
@@ -19,7 +41,12 @@ const MESSAGES_COLLECTION = 'chat_messages';
 // 发送消息到数据库
 export const sendMessageToDb = async (messageText) => {
   try {
-    const docRef = await addDoc(collection(db, MESSAGES_COLLECTION), {
+    const firebaseDb = await initializeFirebase();
+    if (!firebaseDb) {
+      throw new Error('Firebase not available');
+    }
+    
+    const docRef = await addDoc(collection(firebaseDb, MESSAGES_COLLECTION), {
       text: messageText,
       timestamp: serverTimestamp(),
       anonymous: true,
@@ -56,6 +83,12 @@ export const sendMessageToDb = async (messageText) => {
 
 // 批量存储演示弹幕数据到Firebase
 export const storeDemoMessages = async () => {
+  const firebaseDb = await initializeFirebase();
+  if (!firebaseDb) {
+    console.log('Firebase不可用，跳过演示数据存储');
+    return false;
+  }
+
   const demoMessages = [
     "Welcome to Kangyu's Message Board! ✨",
     "Leave your thoughts here 💭",
@@ -73,8 +106,8 @@ export const storeDemoMessages = async () => {
     console.log('🚀 开始存储演示弹幕数据到Firebase...');
     
     // 使用批量写入提高效率
-    const batch = writeBatch(db);
-    const messagesRef = collection(db, MESSAGES_COLLECTION);
+    const batch = writeBatch(firebaseDb);
+    const messagesRef = collection(firebaseDb, MESSAGES_COLLECTION);
     
     // 为每条演示消息创建文档
     demoMessages.forEach((messageText, index) => {
@@ -103,8 +136,22 @@ export const storeDemoMessages = async () => {
 // 获取所有消息（一次性）
 export const getAllMessages = async () => {
   try {
+    const firebaseDb = await initializeFirebase();
+    if (!firebaseDb) {
+      // 返回离线消息和一些默认消息
+      const offlineMessages = JSON.parse(localStorage.getItem('offline_messages') || '[]');
+      const defaultMessages = [
+        { id: 'demo1', text: "Welcome to Kangyu's space! ✨", anonymousName: 'Friendly Guide' },
+        { id: 'demo2', text: "Leave your thoughts here 💭", anonymousName: 'Happy Visitor' },
+        { id: 'demo3', text: "Beautiful design! 🌟", anonymousName: 'Art Lover' },
+        { id: 'demo4', text: "Amazing work! 🎨", anonymousName: 'Creative Soul' },
+        { id: 'demo5', text: "Love the music! 🎵", anonymousName: 'Music Fan' }
+      ];
+      return [...defaultMessages, ...offlineMessages];
+    }
+    
     const q = query(
-      collection(db, MESSAGES_COLLECTION), 
+      collection(firebaseDb, MESSAGES_COLLECTION), 
       orderBy('timestamp', 'asc'),
       limit(100) // 限制最多100条消息
     );
@@ -122,7 +169,12 @@ export const getAllMessages = async () => {
     return messages;
   } catch (error) {
     console.error('获取消息失败:', error);
-    return [];
+    // 返回默认消息
+    return [
+      { id: 'demo1', text: "Welcome to Kangyu's space! ✨", anonymousName: 'Friendly Guide' },
+      { id: 'demo2', text: "Leave your thoughts here 💭", anonymousName: 'Happy Visitor' },
+      { id: 'demo3', text: "Beautiful design! 🌟", anonymousName: 'Art Lover' }
+    ];
   }
 };
 
@@ -130,42 +182,50 @@ export const getAllMessages = async () => {
 export const subscribeToMessages = (callback) => {
   let cleanup = () => {}; // 默认空清理函数
   
-  try {
-    const q = query(
-      collection(db, MESSAGES_COLLECTION), 
-      orderBy('timestamp', 'asc'),
-      limit(100)
-    );
-    
-    // 尝试Firebase实时监听
-    const unsubscribe = onSnapshot(q, 
-      (querySnapshot) => {
-        const messages = [];
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          messages.push({
-            id: doc.id,
-            ...data,
-            // 确保匿名名称存在
-            anonymousName: data.anonymousName || generateAnonymousName()
-          });
-        });
-        callback(messages);
-      }, 
-      (error) => {
-        console.error('Firebase监听失败，切换到离线模式:', error);
-        setupOfflineMode(callback);
+  const setupSubscription = async () => {
+    try {
+      const firebaseDb = await initializeFirebase();
+      if (!firebaseDb) {
+        return setupOfflineMode(callback);
       }
-    );
-    
-    cleanup = unsubscribe;
-    
-  } catch (error) {
-    console.error('Firebase初始化失败，使用离线模式:', error);
-    cleanup = setupOfflineMode(callback);
-  }
+      
+      const q = query(
+        collection(firebaseDb, MESSAGES_COLLECTION), 
+        orderBy('timestamp', 'asc'),
+        limit(100)
+      );
+      
+      // 尝试Firebase实时监听
+      const unsubscribe = onSnapshot(q, 
+        (querySnapshot) => {
+          const messages = [];
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            messages.push({
+              id: doc.id,
+              ...data,
+              // 确保匿名名称存在
+              anonymousName: data.anonymousName || generateAnonymousName()
+            });
+          });
+          callback(messages);
+        }, 
+        (error) => {
+          console.error('Firebase监听失败，切换到离线模式:', error);
+          cleanup = setupOfflineMode(callback);
+        }
+      );
+      
+      cleanup = unsubscribe;
+      
+    } catch (error) {
+      console.error('Firebase初始化失败，使用离线模式:', error);
+      cleanup = setupOfflineMode(callback);
+    }
+  };
   
-  return cleanup;
+  setupSubscription();
+  return () => cleanup();
 };
 
 // 设置离线模式
