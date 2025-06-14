@@ -1,16 +1,50 @@
-// Firebase聊天服务 - 修复版本
-import { db } from '../firebase';
-import { 
-  collection, 
-  addDoc, 
-  getDocs, 
-  query, 
-  orderBy, 
-  limit,
-  serverTimestamp,
-  onSnapshot,
-  connectFirestoreEmulator
-} from 'firebase/firestore';
+// 简化的Firebase聊天服务
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } from 'firebase/firestore';
+
+// Firebase配置 - 只使用环境变量，不包含任何硬编码密钥
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: "G-XFYD9QX8LN"
+};
+
+// 检查必要的环境变量
+const requiredEnvVars = ['VITE_FIREBASE_API_KEY', 'VITE_FIREBASE_AUTH_DOMAIN', 'VITE_FIREBASE_PROJECT_ID'];
+const missingVars = requiredEnvVars.filter(varName => !import.meta.env[varName]);
+
+if (missingVars.length > 0) {
+  console.error('❌ 缺少必要的Firebase环境变量:', missingVars);
+  console.error('请在GitHub Secrets中设置这些变量');
+}
+
+// 初始化Firebase
+let app, db;
+try {
+  app = initializeApp(firebaseConfig);
+  db = getFirestore(app);
+  console.log('🔥 Firebase初始化成功');
+} catch (error) {
+  console.error('❌ Firebase初始化失败:', error);
+}
+
+console.log('🔥 ChatService Firebase配置状态:', {
+  projectId: firebaseConfig.projectId || '❌未设置',
+  authDomain: firebaseConfig.authDomain || '❌未设置',
+  apiKey: firebaseConfig.apiKey ? '✅已设置' : '❌未设置',
+  hasEnvVars: {
+    apiKey: !!import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: !!import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: !!import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: !!import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: !!import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: !!import.meta.env.VITE_FIREBASE_APP_ID
+  }
+});
 
 class ChatService {
   constructor() {
@@ -18,7 +52,6 @@ class ChatService {
     this.isInitialized = false;
     this.isOnline = true;
     this.offlineMessages = [];
-    this.listeners = [];
     
     // 立即初始化
     this.initialize();
@@ -27,18 +60,19 @@ class ChatService {
   async initialize() {
     console.log('🔥 ChatService初始化开始...');
     
+    if (!this.db) {
+      console.error('❌ Firebase数据库未初始化，切换到离线模式');
+      this.isOnline = false;
+      this.isInitialized = true;
+      return;
+    }
+    
     try {
       // 测试Firebase连接
       await this.testConnection();
       this.isInitialized = true;
       this.isOnline = true;
       console.log('✅ ChatService初始化成功');
-      
-      // 尝试同步离线消息
-      if (this.offlineMessages.length > 0) {
-        console.log(`📤 同步${this.offlineMessages.length}条离线消息...`);
-        await this.syncOfflineMessages();
-      }
       
     } catch (error) {
       console.error('❌ ChatService初始化失败:', error);
@@ -89,7 +123,7 @@ class ChatService {
       await this.waitForInitialization();
     }
     
-    if (!this.isOnline) {
+    if (!this.isOnline || !this.db) {
       console.log('📱 离线模式 - 保存到本地');
       this.offlineMessages.push(messageData);
       return { success: true, offline: true };
@@ -130,7 +164,7 @@ class ChatService {
       await this.waitForInitialization();
     }
     
-    if (!this.isOnline) {
+    if (!this.isOnline || !this.db) {
       console.log('📱 离线模式 - 返回本地消息');
       return this.offlineMessages;
     }
@@ -167,70 +201,6 @@ class ChatService {
     }
   }
 
-  subscribeToMessages(callback, limitCount = 50) {
-    console.log('👂 订阅消息更新...');
-    
-    if (!this.isOnline) {
-      console.log('📱 离线模式 - 无法订阅实时更新');
-      return () => {}; // 返回空的取消订阅函数
-    }
-    
-    try {
-      const q = query(
-        collection(this.db, 'chat_messages'),
-        orderBy('timestamp', 'desc'),
-        limit(limitCount)
-      );
-      
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const messages = [];
-        querySnapshot.forEach((doc) => {
-          messages.push({
-            id: doc.id,
-            ...doc.data()
-          });
-        });
-        
-        console.log(`🔄 收到消息更新: ${messages.length}条`);
-        callback(messages.reverse());
-      }, (error) => {
-        console.error('❌ 消息订阅错误:', error);
-        this.isOnline = false;
-        callback(this.offlineMessages);
-      });
-      
-      this.listeners.push(unsubscribe);
-      return unsubscribe;
-      
-    } catch (error) {
-      console.error('❌ 订阅消息失败:', error);
-      this.isOnline = false;
-      return () => {};
-    }
-  }
-
-  async syncOfflineMessages() {
-    if (this.offlineMessages.length === 0 || !this.isOnline) {
-      return;
-    }
-    
-    console.log(`🔄 同步${this.offlineMessages.length}条离线消息...`);
-    
-    const messagesToSync = [...this.offlineMessages];
-    this.offlineMessages = [];
-    
-    for (const message of messagesToSync) {
-      try {
-        await this.sendMessage(message);
-        console.log('✅ 离线消息同步成功');
-      } catch (error) {
-        console.error('❌ 离线消息同步失败:', error);
-        // 重新加入离线队列
-        this.offlineMessages.push(message);
-      }
-    }
-  }
-
   async waitForInitialization(timeout = 5000) {
     const startTime = Date.now();
     
@@ -246,14 +216,6 @@ class ChatService {
   // 清理资源
   cleanup() {
     console.log('🧹 清理ChatService资源...');
-    this.listeners.forEach(unsubscribe => {
-      try {
-        unsubscribe();
-      } catch (error) {
-        console.error('清理监听器失败:', error);
-      }
-    });
-    this.listeners = [];
   }
 
   // 获取连接状态
