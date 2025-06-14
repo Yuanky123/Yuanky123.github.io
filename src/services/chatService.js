@@ -1,5 +1,5 @@
 // Firebase聊天服务 - 修复版本
-import { db } from '../firebase.js';
+import { db } from '../firebase';
 import { 
   collection, 
   addDoc, 
