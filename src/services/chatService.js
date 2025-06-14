@@ -4,17 +4,17 @@ import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serve
 
 // Firebase配置 - 只使用环境变量，不包含任何硬编码密钥
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: import.meta.env.FIREBASE_API_KEY,
+  authDomain: import.meta.env.FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.FIREBASE_APP_ID,
   measurementId: "G-XFYD9QX8LN"
 };
 
 // 检查必要的环境变量
-const requiredEnvVars = ['VITE_FIREBASE_API_KEY', 'VITE_FIREBASE_AUTH_DOMAIN', 'VITE_FIREBASE_PROJECT_ID'];
+const requiredEnvVars = ['FIREBASE_API_KEY', 'FIREBASE_AUTH_DOMAIN', 'FIREBASE_PROJECT_ID'];
 const missingVars = requiredEnvVars.filter(varName => !import.meta.env[varName]);
 
 if (missingVars.length > 0) {
@@ -37,12 +37,12 @@ console.log('🔥 ChatService Firebase配置状态:', {
   authDomain: firebaseConfig.authDomain || '❌未设置',
   apiKey: firebaseConfig.apiKey ? '✅已设置' : '❌未设置',
   hasEnvVars: {
-    apiKey: !!import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: !!import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: !!import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: !!import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: !!import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: !!import.meta.env.VITE_FIREBASE_APP_ID
+    apiKey: !!import.meta.env.FIREBASE_API_KEY,
+    authDomain: !!import.meta.env.FIREBASE_AUTH_DOMAIN,
+    projectId: !!import.meta.env.FIREBASE_PROJECT_ID,
+    storageBucket: !!import.meta.env.FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: !!import.meta.env.FIREBASE_MESSAGING_SENDER_ID,
+    appId: !!import.meta.env.FIREBASE_APP_ID
   }
 });
 
