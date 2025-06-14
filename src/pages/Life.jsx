@@ -858,42 +858,57 @@ export default function Life({ onClose }) {
 
   // 发送留言的函数 - 修改为使用Firebase
   const sendMessage = async () => {
-    if (!messageInput.trim()) return;
+    const messageText = messageInput.trim();
+    console.log('🚀 开始发送消息:', messageText);
+    
+    if (!messageText) {
+      console.log('❌ 消息为空，取消发送');
+      return;
+    }
+    
+    // 立即清空输入框，提供即时反馈
+    setMessageInput('');
+    
+    // 立即创建弹幕，提供即时反馈
+    createDanmaku(messageText);
     
     try {
-      // 立即创建弹幕，提供即时反馈
-      createDanmaku(messageInput.trim());
+      console.log('📤 尝试发送到Firebase数据库...');
       
       // 尝试发送到Firebase数据库
-      await sendMessageToDb(messageInput.trim());
+      const messageId = await sendMessageToDb(messageText);
+      console.log('✅ 消息已发送到Firebase，ID:', messageId);
       
       // 重新获取所有消息以更新计数
       const updatedMessages = await getAllMessages();
       setAllFirebaseMessages(updatedMessages);
       setMessageCount(updatedMessages.length);
       
-      // 清空输入框
-      setMessageInput('');
+      console.log('✅ 消息计数已更新:', updatedMessages.length);
       
-      console.log('✅ 消息已发送到Firebase数据库');
     } catch (error) {
       console.error('❌ 发送消息失败，使用离线模式:', error);
       
       // 离线模式：更新本地消息计数
-      setMessageCount(prev => prev + 1);
+      setMessageCount(prev => {
+        const newCount = prev + 1;
+        console.log('📊 离线模式消息计数更新:', newCount);
+        return newCount;
+      });
       
       // 添加到本地弹幕池
       const newMessage = {
         id: 'local_' + Date.now(),
-        text: messageInput.trim(),
+        text: messageText,
         anonymousName: generateAnonymousName(),
         offline: true
       };
       
-      setDanmakuPool(prev => [...prev, newMessage].slice(-20)); // 保持最多20条
-      
-      // 清空输入框
-      setMessageInput('');
+      setDanmakuPool(prev => {
+        const newPool = [...prev, newMessage].slice(-20);
+        console.log('📝 本地弹幕池已更新，当前数量:', newPool.length);
+        return newPool;
+      });
       
       console.log('✅ 消息已保存到本地模式');
     }
