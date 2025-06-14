@@ -19,6 +19,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,35 +33,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
         
-      - name: Create Firebase config from secrets
+      - name: Build with Firebase secrets
+        env:
+          VITE_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
         run: |
-          echo "Creating Firebase config from environment variables..."
-          cat > src/firebase.js << EOF
-          // Import the functions you need from the SDKs you need
-          import { initializeApp } from "firebase/app";
-          import { getFirestore } from "firebase/firestore";
-          
-          // Your web app's Firebase configuration
-          const firebaseConfig = {
-            apiKey: "${{ secrets.FIREBASE_API_KEY }}",
-            authDomain: "${{ secrets.FIREBASE_AUTH_DOMAIN }}",
-            projectId: "${{ secrets.FIREBASE_PROJECT_ID }}",
-            storageBucket: "${{ secrets.FIREBASE_STORAGE_BUCKET }}",
-            messagingSenderId: "${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}",
-            appId: "${{ secrets.FIREBASE_APP_ID }}"
-          };
-          
-          // Initialize Firebase
-          const app = initializeApp(firebaseConfig);
-          
-          // Initialize Firestore
-          export const db = getFirestore(app);
-          
-          export default app;
-          EOF
-          
-      - name: Build
-        run: npm run build
+          echo "🔥 Building with Firebase configuration..."
+          echo "Project ID: ${{ secrets.FIREBASE_PROJECT_ID }}"
+          echo "Auth Domain: ${{ secrets.FIREBASE_AUTH_DOMAIN }}"
+          npm run build
         
       - name: Setup Pages
         uses: actions/configure-pages@v4
