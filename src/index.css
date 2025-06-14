@@ -1,0 +1,37 @@
+:root {
+  --sidebar-width: 270px;
+  --primary: #3674B5;
+  --primary-light: #3674B5;
+  --bg: #f7fafc;
+  --highlight: #FFF89A;
+  --title: #3674B5;
+  --text: #222;
+  --card-bg: #fff;
+  --border: #3674B5;
+  --transition: 0.3s cubic-bezier(.4,0,.2,1);
+}
+[data-theme='dark'] {
+  --bg: #18181c;
+  --text: #f3f3f3;
+  --card-bg: #23232a;
+  --border: #33343a;
+}
+body {
+  margin: 0;
+  font-family: 'Segoe UI', 'PingFang SC', 'Hiragino Sans', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  transition: background var(--transition), color var(--transition);
+}
+#root {
+  min-height: 100vh;
+  display: flex;
+}
+::-webkit-scrollbar {
+  width: 8px;
+  background: #e0e0e0;
+}
+::-webkit-scrollbar-thumb {
+  background: #b0b0b0;
+  border-radius: 4px;
+} 
