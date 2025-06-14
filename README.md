@@ -56,14 +56,36 @@ A modern, interactive personal website built with React and Vite, featuring a un
 
 ## 🔧 Configuration
 
-### Firebase Setup (Optional)
+### Firebase Setup (Required for Message Board)
 
 The message board and danmaku system require Firebase configuration:
 
+#### For Local Development:
 1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
 2. Enable Firestore Database
 3. Copy your Firebase config to `src/firebase.js`
 4. Update Firestore security rules as needed
+
+#### For GitHub Pages Deployment:
+1. **Set up Firebase Secrets**: Follow the detailed guide in `setup_github_secrets.md`
+2. **Configure 6 GitHub Secrets**:
+   - `FIREBASE_API_KEY`
+   - `FIREBASE_AUTH_DOMAIN`
+   - `FIREBASE_PROJECT_ID`
+   - `FIREBASE_STORAGE_BUCKET`
+   - `FIREBASE_MESSAGING_SENDER_ID`
+   - `FIREBASE_APP_ID`
+
+#### Quick Deploy Scripts:
+- **Windows**: Run `deploy_with_firebase.bat`
+- **PowerShell**: Run `deploy_with_firebase.ps1`
+
+#### Testing Firebase Connection:
+```bash
+node test_firebase_connection.js
+```
+
+📖 **Detailed Setup Guide**: See `FIREBASE_SETUP_GUIDE.md` for complete instructions.
 
 ### Customization
 

@@ -861,7 +861,10 @@ export default function Life({ onClose }) {
     if (!messageInput.trim()) return;
     
     try {
-      // 发送到Firebase数据库
+      // 立即创建弹幕，提供即时反馈
+      createDanmaku(messageInput.trim());
+      
+      // 尝试发送到Firebase数据库
       await sendMessageToDb(messageInput.trim());
       
       // 重新获取所有消息以更新计数
@@ -869,18 +872,30 @@ export default function Life({ onClose }) {
       setAllFirebaseMessages(updatedMessages);
       setMessageCount(updatedMessages.length);
       
-      // 创建弹幕
-      createDanmaku(messageInput.trim());
-      
       // 清空输入框
       setMessageInput('');
       
       console.log('✅ 消息已发送到Firebase数据库');
     } catch (error) {
-      console.error('❌ 发送消息失败:', error);
-      // 如果Firebase失败，仍然创建本地弹幕
-      createDanmaku(messageInput.trim());
+      console.error('❌ 发送消息失败，使用离线模式:', error);
+      
+      // 离线模式：更新本地消息计数
+      setMessageCount(prev => prev + 1);
+      
+      // 添加到本地弹幕池
+      const newMessage = {
+        id: 'local_' + Date.now(),
+        text: messageInput.trim(),
+        anonymousName: generateAnonymousName(),
+        offline: true
+      };
+      
+      setDanmakuPool(prev => [...prev, newMessage].slice(-20)); // 保持最多20条
+      
+      // 清空输入框
       setMessageInput('');
+      
+      console.log('✅ 消息已保存到本地模式');
     }
   };
 
