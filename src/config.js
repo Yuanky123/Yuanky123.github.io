@@ -4,12 +4,12 @@ const config = {
   name: 'Kangyu YUAN',
   name_cn: '袁康宇',
   title: 'Ph.D. Student',
-  avatar: 'public/materials/avatar.jpg',
+  avatar: '/materials/avatar.jpg',
   bio: `I am currently a Ph.D. student at the Hong Kong University of Science and Technology (HKUST), supervised by [Prof. Xiaojuan Ma](https://cse.hkust.edu.hk/~mxj/) since 2024. 
   Before that, I studied and got the degree of B.E. in department of [Artificial Intelligence](https://sai.sysu.edu.cn/) at Sun Yat-sen University from 2020 to 2024, where I received research training from [Prof. Zhenhui Peng](https://zhenhuipeng.com/). 
   My current research interests include **Social Computing** and **Mental Health**. I am committed to sustainable and friendly communities building through:`,
   bioList: [
-    '(1) Analyzing user interaction patterns & involvement in online communities ==(Factors Identification)==',
+    '(1) Analyzing user interaction patterns & Evolvement in online communities ==(Factors Identification)==',
     '(2) Exploring the potential interventions strategies in a user-center perspective ==(Design Exploration)==.',
     '(3) Introducing social-technical skills to mitigate online negative social phenomena ==(System Application)==.'
   ],
