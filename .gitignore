@@ -74,9 +74,8 @@ jspm_packages/
 .nuxt
 dist
 
-# Gatsby files
+# Gatsby files (removed public exclusion for Vite)
 .cache/
-public
 
 # Storybook build outputs
 .out
