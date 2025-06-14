@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled, { keyframes } from 'styled-components';
-import { sendMessageToDb, getAllMessages } from '../services/chatService';
+import chatService from '../services/chatService';
 
 const fadeIn = keyframes`
   0% {
@@ -875,12 +875,18 @@ export default function Life({ onClose }) {
     try {
       console.log('📤 尝试发送到Firebase数据库...');
       
-      // 尝试发送到Firebase数据库
-      const messageId = await sendMessageToDb(messageText);
-      console.log('✅ 消息已发送到Firebase，ID:', messageId);
+      // 使用新的chatService发送消息
+      const messageData = {
+        text: messageText,
+        anonymous: true,
+        anonymousName: generateAnonymousName()
+      };
+      
+      const result = await chatService.sendMessage(messageData);
+      console.log('✅ 消息发送结果:', result);
       
       // 重新获取所有消息以更新计数
-      const updatedMessages = await getAllMessages();
+      const updatedMessages = await chatService.getMessages();
       setAllFirebaseMessages(updatedMessages);
       setMessageCount(updatedMessages.length);
       
@@ -991,7 +997,7 @@ export default function Life({ onClose }) {
     // 加载Firebase消息
     const loadFirebaseMessages = async () => {
       try {
-        const firebaseMessages = await getAllMessages();
+        const firebaseMessages = await chatService.getMessages();
         setAllFirebaseMessages(firebaseMessages);
         setMessageCount(firebaseMessages.length);
         

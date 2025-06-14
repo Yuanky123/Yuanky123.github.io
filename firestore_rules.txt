@@ -1,0 +1,25 @@
+// 正确的Firestore安全规则
+// 复制以下规则到Firebase控制台 > Firestore Database > 规则
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 允许读取和写入chat_messages集合
+    match /chat_messages/{document} {
+      allow read, write: if true;
+    }
+    
+    // 其他集合拒绝访问（可选，为了安全）
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+// 设置步骤：
+// 1. 访问 https://console.firebase.google.com/
+// 2. 选择你的项目 kangyu-website
+// 3. 点击 Firestore Database
+// 4. 点击 "规则" 标签
+// 5. 将上面的规则复制粘贴到编辑器中
+// 6. 点击 "发布" 按钮 
