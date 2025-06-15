@@ -2,7 +2,7 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } from 'firebase/firestore';
 
-// Firebase配置 - 生产环境使用环境变量
+// Firebase配置 - 使用环境变量
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -13,30 +13,33 @@ const firebaseConfig = {
   measurementId: "G-XFYD9QX8LN"
 };
 
-// 初始化Firebase（如果没有环境变量将在类中尝试本地配置）
-let app, envDb;
-
 // 检查必要的环境变量
 const requiredEnvVars = ['VITE_FIREBASE_API_KEY', 'VITE_FIREBASE_AUTH_DOMAIN', 'VITE_FIREBASE_PROJECT_ID'];
 const missingVars = requiredEnvVars.filter(varName => !import.meta.env[varName]);
 
+let app, db;
+
 if (missingVars.length > 0) {
-  console.log('📦 缺少环境变量，将尝试使用本地firebase.js配置');
+  console.error('❌ 缺少必要的Firebase环境变量:', missingVars);
+  console.error('请检查GitHub Secrets或本地.env文件');
+  db = null;
 } else {
   try {
     // 使用环境变量初始化Firebase
     app = initializeApp(firebaseConfig);
-    envDb = getFirestore(app);
-    console.log('🔥 Firebase通过环境变量初始化成功（生产环境）');
+    db = getFirestore(app);
+    console.log('🔥 Firebase通过环境变量初始化成功');
   } catch (error) {
-    console.error('❌ Firebase环境变量初始化失败:', error);
-    envDb = null;
+    console.error('❌ Firebase初始化失败:', error);
+    db = null;
   }
 }
 
 console.log('🔥 ChatService Firebase配置状态:', {
-  mode: envDb ? '生产环境（环境变量）' : '将尝试本地配置',
-  envDbAvailable: !!envDb,
+  projectId: firebaseConfig.projectId || '❌未设置',
+  authDomain: firebaseConfig.authDomain || '❌未设置',
+  apiKey: firebaseConfig.apiKey ? '✅已设置' : '❌未设置',
+  dbInitialized: !!db,
   hasEnvVars: {
     apiKey: !!import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: !!import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -61,24 +64,33 @@ class ChatService {
   async initialize() {
     console.log('🔥 ChatService初始化开始...');
     
-    // 首先尝试使用环境变量的db
-    if (envDb) {
-      this.db = envDb;
+    // 优先使用环境变量初始化的db
+    if (db) {
+      this.db = db;
       console.log('✅ 使用环境变量初始化的Firebase');
     } else {
-      // 尝试导入本地firebase配置（开发环境）
-      try {
-        const { db } = await import('../firebase.js');
-        this.db = db;
-        console.log('🔥 使用本地firebase.js配置（开发环境）');
-      } catch (error) {
-        console.error('❌ 无法导入本地firebase.js配置:', error.message);
+      // 只在开发环境尝试导入本地配置
+      if (import.meta.env.DEV) {
+        try {
+          console.log('🔄 开发环境：尝试导入本地firebase.js配置...');
+          const { db: localDb } = await import('../firebase.js');
+          this.db = localDb;
+          console.log('🔥 使用本地firebase.js配置（开发环境）');
+        } catch (error) {
+          console.log('📦 本地firebase.js不存在，这在生产环境是正常的');
+          this.db = null;
+        }
+      } else {
+        console.log('🏭 生产环境：只使用环境变量配置');
         this.db = null;
       }
     }
     
     if (!this.db) {
       console.error('❌ Firebase数据库未初始化，切换到离线模式');
+      console.error('请检查：');
+      console.error('1. GitHub Secrets是否正确设置');
+      console.error('2. 环境变量是否正确传递');
       this.isOnline = false;
       this.isInitialized = true;
       return;
