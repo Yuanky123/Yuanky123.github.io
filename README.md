@@ -60,14 +60,65 @@ A modern, interactive personal website built with React and Vite, featuring a un
 
 The message board and danmaku system require Firebase configuration:
 
+#### 🚨 **重要：环境变量配置问题解决**
+
+**如果你的留言板无法连接Firebase，请按以下步骤检查：**
+
+1. **环境变量前缀问题**：
+   - Vite要求所有客户端环境变量必须以 `VITE_` 开头
+   - 确保使用 `VITE_FIREBASE_API_KEY` 而不是 `FIREBASE_API_KEY`
+
+2. **本地开发配置**：
+   ```bash
+   # 创建 .env 文件（不要提交到Git）
+   cp .env.example .env
+   
+   # 编辑 .env 文件，填入你的Firebase配置：
+   VITE_FIREBASE_API_KEY=your-actual-api-key
+   VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+   VITE_FIREBASE_PROJECT_ID=your-project-id
+   VITE_FIREBASE_STORAGE_BUCKET=your-project.firebasestorage.app
+   VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+   VITE_FIREBASE_APP_ID=your-app-id
+   ```
+
+3. **生产环境配置（GitHub Pages）**：
+   - 在GitHub仓库设置中添加以下Secrets：
+   - `FIREBASE_API_KEY`
+   - `FIREBASE_AUTH_DOMAIN`
+   - `FIREBASE_PROJECT_ID`
+   - `FIREBASE_STORAGE_BUCKET`
+   - `FIREBASE_MESSAGING_SENDER_ID`
+   - `FIREBASE_APP_ID`
+
 #### For Local Development:
 1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
 2. Enable Firestore Database
-3. Copy your Firebase config to `src/firebase.js`
-4. Update Firestore security rules as needed
+3. **创建 `.env` 文件**：
+   ```bash
+   # 复制环境变量模板
+   echo "VITE_FIREBASE_API_KEY=your-api-key
+   VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+   VITE_FIREBASE_PROJECT_ID=your-project-id
+   VITE_FIREBASE_STORAGE_BUCKET=your-project.firebasestorage.app
+   VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+   VITE_FIREBASE_APP_ID=your-app-id" > .env
+   ```
+4. 从Firebase控制台复制配置信息填入`.env`文件
+5. 设置Firestore安全规则：
+   ```javascript
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       match /chat_messages/{document} {
+         allow read, write: if true;
+       }
+     }
+   }
+   ```
 
 #### For GitHub Pages Deployment:
-1. **Set up Firebase Secrets**: Follow the detailed guide in `setup_github_secrets.md`
+1. **Set up Firebase Secrets**: Follow the detailed guide in `GITHUB_SECRETS_SETUP.md`
 2. **Configure 6 GitHub Secrets**:
    - `FIREBASE_API_KEY`
    - `FIREBASE_AUTH_DOMAIN`
@@ -75,6 +126,29 @@ The message board and danmaku system require Firebase configuration:
    - `FIREBASE_STORAGE_BUCKET`
    - `FIREBASE_MESSAGING_SENDER_ID`
    - `FIREBASE_APP_ID`
+
+#### 🔧 Troubleshooting Firebase Connection:
+
+**常见问题及解决方案：**
+
+1. **环境变量未加载**：
+   ```bash
+   # 检查环境变量是否正确设置
+   npm run dev
+   # 在浏览器控制台查看是否有"Firebase配置状态"日志
+   ```
+
+2. **权限被拒绝**：
+   - 检查Firestore安全规则
+   - 确保允许读写 `chat_messages` 集合
+
+3. **API密钥无效**：
+   - 检查Firebase控制台中的API密钥是否正确
+   - 确保项目ID匹配
+
+4. **网络连接问题**：
+   - 检查网络连接
+   - 确认Firebase项目状态正常
 
 #### Quick Deploy Scripts:
 - **Windows**: Run `deploy_with_firebase.bat`

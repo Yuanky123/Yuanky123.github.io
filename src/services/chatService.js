@@ -2,53 +2,54 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } from 'firebase/firestore';
 
-// Firebase配置 - 只使用环境变量，不包含任何硬编码密钥
+// Firebase配置 - 生产环境使用环境变量
 const firebaseConfig = {
-  apiKey: import.meta.env.FIREBASE_API_KEY,
-  authDomain: import.meta.env.FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.FIREBASE_APP_ID,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
   measurementId: "G-XFYD9QX8LN"
 };
 
+// 初始化Firebase（如果没有环境变量将在类中尝试本地配置）
+let app, envDb;
+
 // 检查必要的环境变量
-const requiredEnvVars = ['FIREBASE_API_KEY', 'FIREBASE_AUTH_DOMAIN', 'FIREBASE_PROJECT_ID'];
+const requiredEnvVars = ['VITE_FIREBASE_API_KEY', 'VITE_FIREBASE_AUTH_DOMAIN', 'VITE_FIREBASE_PROJECT_ID'];
 const missingVars = requiredEnvVars.filter(varName => !import.meta.env[varName]);
 
 if (missingVars.length > 0) {
-  console.error('❌ 缺少必要的Firebase环境变量:', missingVars);
-  console.error('请在GitHub Secrets中设置这些变量');
-}
-
-// 初始化Firebase
-let app, db;
-try {
-  app = initializeApp(firebaseConfig);
-  db = getFirestore(app);
-  console.log('🔥 Firebase初始化成功');
-} catch (error) {
-  console.error('❌ Firebase初始化失败:', error);
+  console.log('📦 缺少环境变量，将尝试使用本地firebase.js配置');
+} else {
+  try {
+    // 使用环境变量初始化Firebase
+    app = initializeApp(firebaseConfig);
+    envDb = getFirestore(app);
+    console.log('🔥 Firebase通过环境变量初始化成功（生产环境）');
+  } catch (error) {
+    console.error('❌ Firebase环境变量初始化失败:', error);
+    envDb = null;
+  }
 }
 
 console.log('🔥 ChatService Firebase配置状态:', {
-  projectId: firebaseConfig.projectId || '❌未设置',
-  authDomain: firebaseConfig.authDomain || '❌未设置',
-  apiKey: firebaseConfig.apiKey ? '✅已设置' : '❌未设置',
+  mode: envDb ? '生产环境（环境变量）' : '将尝试本地配置',
+  envDbAvailable: !!envDb,
   hasEnvVars: {
-    apiKey: !!import.meta.env.FIREBASE_API_KEY,
-    authDomain: !!import.meta.env.FIREBASE_AUTH_DOMAIN,
-    projectId: !!import.meta.env.FIREBASE_PROJECT_ID,
-    storageBucket: !!import.meta.env.FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: !!import.meta.env.FIREBASE_MESSAGING_SENDER_ID,
-    appId: !!import.meta.env.FIREBASE_APP_ID
+    apiKey: !!import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: !!import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: !!import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: !!import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: !!import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: !!import.meta.env.VITE_FIREBASE_APP_ID
   }
 });
 
 class ChatService {
   constructor() {
-    this.db = db;
+    this.db = null;
     this.isInitialized = false;
     this.isOnline = true;
     this.offlineMessages = [];
@@ -59,6 +60,22 @@ class ChatService {
 
   async initialize() {
     console.log('🔥 ChatService初始化开始...');
+    
+    // 首先尝试使用环境变量的db
+    if (envDb) {
+      this.db = envDb;
+      console.log('✅ 使用环境变量初始化的Firebase');
+    } else {
+      // 尝试导入本地firebase配置（开发环境）
+      try {
+        const { db } = await import('../firebase.js');
+        this.db = db;
+        console.log('🔥 使用本地firebase.js配置（开发环境）');
+      } catch (error) {
+        console.error('❌ 无法导入本地firebase.js配置:', error.message);
+        this.db = null;
+      }
+    }
     
     if (!this.db) {
       console.error('❌ Firebase数据库未初始化，切换到离线模式');
