@@ -7,11 +7,11 @@ const config = {
   avatar: '/materials/avatar.jpg',
   bio: `I am currently a Ph.D. candidate at the Hong Kong University of Science and Technology (HKUST), supervised by [Prof. Xiaojuan Ma](https://cse.hkust.edu.hk/~mxj/) since 2024. 
   Before that, I studied and got the degree of B.E. in department of [Artificial Intelligence](https://sai.sysu.edu.cn/) at Sun Yat-sen University from 2020 to 2024, where I received research training from [Prof. Zhenhui Peng](https://zhenhuipeng.com/). 
-  My current research interests include **Social Computing** and **Mental Health**. I am committed to sustainable and friendly communities building through:`,
+  My current research interests include **Social Computing** and **Mental Health**. I am committed to sustainable and friendly digital environment building through:`,
   bioList: [
-    '(1) Analyzing user interaction patterns & Evolvement in online communities ==(Factors Identification)==',
+    '(1) Analyzing user interaction patterns & evolvement in digital environment ==(Factors Identification)==',
     '(2) Exploring the potential interventions strategies in a user-center perspective ==(Design Exploration)==.',
-    '(3) Introducing social-technical skills to mitigate online negative social phenomena ==(System Application)==.'
+    '(3) Introducing social-technical systems to mitigate online harmful behaviors ==(System Application)==.'
   ],
   bioAfterList: `I am currently looking for collaborators on online community sustainability and friendliness. If you are interested in my research topics, please feel free to contact me.`,
 
@@ -33,7 +33,7 @@ const config = {
     {
       department: 'Department of Computer Science and Engineering',
       school: 'The Hong Kong University of Science and Technology',
-      degree: 'Ph.D. Student',
+      degree: 'Ph.D. Candidate',
       time: '2024 - Present',
     },
     {
@@ -61,6 +61,26 @@ const config = {
     'Research Interest 3',
   ],
   news: [
+    {
+      date: 'Apr. 2026',
+      content: 'Attend the CHI 2026 in Barcelona, Spain. Glad to present our work!',
+    },
+    {
+      date: 'Mar. 2026',
+      content: 'Pass the PhD Qualification Exam. Thanks to all!',
+    },
+    {
+      date: 'Mar. 2026',
+      content: 'One **@CHI 2026** first author LBW work accepted. Thanks to all collaborators!',
+    },
+    {
+      date: 'Mar. 2026',
+      content: 'One **@CHI 2026** first author paper and Two **@CHI 2026** co-author papers accepted. Congrats and thanks to all!',
+    },
+    {
+      date: 'Mar. 2026',
+      content: 'One **@Group** co-author paper accepted. Congrats and thanks to all!',
+    },
     {
       date: 'Jun. 2025',
       content: 'One **@CSCW 2025** co-author paper accepted. Congrats and thanks to all!',
@@ -99,6 +119,20 @@ const config = {
     },
   ],
   papers: [
+    {
+      title: '[CHI 2026] "Exploring Aggressors\' In-Match Cognitive and Emotional Formation and Toxic Behavior Trajectories in MOBA Games',
+      authors: '==Kangyu YUAN==, Hanfang Lyu, Runhua Zhang, Hansika Murugu, Xiaojuan Ma',
+      venue: 'CHI',
+      year: '2026',
+      link: 'https://yuanky123.github.io/src/Papers/chi26-10.pdf',
+    },
+    {
+      title: '[CHI EA 2026] "AI Clone Companions and “Dream Girl” Fans: How Idol-Based Agents Reshape Parasocial Relationships Across Real and Virtual Domains',
+      authors: '==Kangyu YUAN==, Tak Kwan Wang, Jiachen Du, Yuanhao Zhang, Ziqi Pan, Xiaojuan Ma',
+      venue: 'CHI EA',
+      year: '2026',
+      link: 'https://yuanky123.github.io/src/Papers/chiea26-293.pdf',
+    },
     {
       title: '[CHI EA 2025] "I Love the Internet Again": Exploring the Interaction Inception of "TikTok Refugees" Flocking into RedNote',
       authors: '==Kangyu YUAN==, Li Zhang, Hanfang Lyu, Ziqi Pan, Yuanhao Zhang, Junze Li, Bingcan Guo, Jiaxiong Hu, Qingyu Guo, Xiaojuan Ma',
