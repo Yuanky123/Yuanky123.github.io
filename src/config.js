@@ -124,14 +124,14 @@ const config = {
       authors: '==Kangyu YUAN==, Hanfang Lyu, Runhua Zhang, Hansika Murugu, Xiaojuan Ma',
       venue: 'CHI',
       year: '2026',
-      link: '/src/Papers/chi26-10.pdf',
+      link: 'public/materials/Papers/chi26-10.pdf',
     },
     {
       title: '[CHI EA 2026] "AI Clone Companions and “Dream Girl” Fans: How Idol-Based Agents Reshape Parasocial Relationships Across Real and Virtual Domains',
       authors: '==Kangyu YUAN==, Tak Kwan Wang, Jiachen Du, Yuanhao Zhang, Ziqi Pan, Xiaojuan Ma',
       venue: 'CHI EA',
       year: '2026',
-      link: '/src/Papers/chiea26-293.pdf',
+      link: 'public/materials/Papers/chiea26-293.pdf',
     },
     {
       title: '[CHI EA 2025] "I Love the Internet Again": Exploring the Interaction Inception of "TikTok Refugees" Flocking into RedNote',
